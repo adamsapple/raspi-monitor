@@ -1,3 +1,10 @@
-/.lgd-nfy0
-/.venv
-/__pycache__
+/.lgd-nfy0/
+/.venv/
+/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.log
+.vscode/
+.idea/
+.DS_Store
