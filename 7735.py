@@ -32,10 +32,10 @@ BAUDRATE = 24000000
 FONT1_SIZE        = 14
 FONT2_SIZE        = 12
 FONT1_PATH        = f"./fonts/ter-u{FONT1_SIZE}n.pil"   # makePilFont.py で作成した PIL font を指定
-FONT2_PATH        = f"./fonts/ter-u{FONT2_SIZE}n.pil"   # makePilFont.py で作成した PIL font を指定
+#FONT2_PATH        = f"./fonts/ter-u{FONT2_SIZE}n.pil"   # makePilFont.py で作成した PIL font を指定
 #FONT2_PATH        = f"fonts/HaxorMedium-10.pil"
 #FONT2_PATH        = f"fonts/6x10.pil"
-#FONT2_PATH        = f"fonts/5x8.pil"
+FONT2_PATH        = "./fonts/ter-u12n.pil"
 
 UPDATE_INTERVAL   = 0.5           # info update interval.
 BLACK_INTERVAL    = 60

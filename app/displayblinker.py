@@ -37,6 +37,7 @@ class DisplayBlinker:
     def is_visible(self, value: bool) -> None:
         if value != '':
           self.bl_pin.value = value
+
     ##
     # update display visibility.
     # 
