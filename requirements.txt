@@ -1,0 +1,8 @@
+ipget
+asq
+pillow
+adafruit-circuitpython-rgb-display
+adafruit-blinka
+rpi-lgpio
+# sudo apt install liblgpio-dev
+# python -m venv .venv --system-site-packages
