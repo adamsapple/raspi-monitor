@@ -4,5 +4,6 @@ pillow
 adafruit-circuitpython-rgb-display
 adafruit-blinka
 rpi-lgpio
+#pigpio
 # sudo apt install liblgpio-dev
 # python -m venv .venv --system-site-packages

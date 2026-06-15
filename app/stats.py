@@ -142,9 +142,10 @@ class Stats:
     def updateMem(self):
         mem = psutil.virtual_memory()
         self.usedMemPercent = mem.percent
+        unit_to_giga = 1.0 /1024/1024/1024
         #self.usedMem       = mem.used  /1024/1024/1024
-        self.usedMem        = (mem.total-mem.available) /1024/1024/1024
-        self.totalMem       = mem.total /1024/1024/1024
+        self.usedMem        = (mem.total-mem.available) * unit_to_giga
+        self.totalMem       = mem.total * unit_to_giga
 
     ##
     # IP

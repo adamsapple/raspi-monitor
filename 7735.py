@@ -36,6 +36,8 @@ FONT1_PATH        = f"./fonts/ter-u{FONT1_SIZE}n.pil"   # makePilFont.py で作�
 #FONT2_PATH        = f"fonts/HaxorMedium-10.pil"
 #FONT2_PATH        = f"fonts/6x10.pil"
 FONT2_PATH        = "./fonts/ter-u12n.pil"
+FONT3_PATH        = "./fonts/Bm5x8.pil"
+
 
 UPDATE_INTERVAL   = 0.5           # info update interval.
 BLACK_INTERVAL    = 60
@@ -77,23 +79,24 @@ disp.fill(0)
 image  = Image.new("RGB", (width, height))
 font1  = ImageFont.load(FONT1_PATH)
 font2  = ImageFont.load(FONT2_PATH)
+font3  = ImageFont.load(FONT3_PATH)
 draw   = ImageDraw.Draw(image)
 
 stats   = Stats(UPDATE_INTERVAL, NETWORK_INTERFACE, STORAGE_PARTITION)
 frame   = FrameOperator()
 aligner = Aligner()
 blinker = DisplayBlinker(btn_pinid, bl_pin, BLACK_INTERVAL)
-#casefan = FanController()
+casefan = FanController()
 
 ##
 # bootstrap animation.
 #
 def draw_startup_animation(is_visible: bool = True):
     base_color  = "#16161d"     # "#4dd0ff"
-    frame_color = "#d0cbb1"      # "#4dd0ff"
+    frame_color = "#cdc8ae"      # "#4dd0ff"
     bg_color    = "#1f1f28"   # "#10253b"
 
-    primary_color   = "#dbd69c"   # "#ffffff"
+    primary_color   = "#dcc98d"   # "#ffffff"
     secondary_color = "#957fb8"     # "#7cf7ff"
     third_color     = "#54546d"     #"#9be3ff"    
     inverted_color  = "#202a3c"     # "#1f1f28"
@@ -184,17 +187,37 @@ def draw_stats(is_visible:bool = True):
 
     draw.text((0, y), f"Time: {time.strftime('%H:%M:%S')}", font=font1, fill="#dcc98d")
     y += row1
+
+    # ip
     draw.text((0, y), aligner.formattedMsg(f"IP:*{stats.ip}", word_count), font=font2, fill="#dcc98d")
     y += row2
+
+    # cpu
     draw.text((x, y), aligner.formattedMsg("CPU:{:>3.0f}%".format(stats.cpu) +  " *{:.1f}°c".format(stats.temp), word_count-1), font=font2, fill="#dcc98d")
     y += row2
-    draw.text((x, y), aligner.formattedMsg(f"Mem: {stats.usedMemPercent}", word_count-1), font=font2, fill="#dcc98d")
+    
+    # memory
+    draw.text((x, y), aligner.formattedMsg(f"Mem: {stats.usedMemPercent:>.0f}%", word_count-1), font=font2, fill="#dcc98d")
     y += row2
-    draw.text((x, y), f"Dsk: {stats.diskUseGB:.1f}GB / {stats.diskTotalGB:.1f}GB", font=font2, fill="#dcc98d")
+    draw.text((x, y), aligner.formattedMsg(f"    {(stats.usedMem):.1f} / {(stats.totalMem):.1f}GB", word_count-1), font=font3, fill="#dcc98d")
+    y += row2
+    
+    # disk
+    disk_percent = stats.diskUseGB * 100 / stats.diskTotalGB
+    draw.text((x, y), aligner.formattedMsg(f"Dsk: {disk_percent:>.0f}%", word_count-1), font=font2, fill="#dcc98d")
+    y += row2
+    draw.text((x, y), f"   {stats.diskUseGB:.1f} / {stats.diskTotalGB:.1f}GB", font=font3, fill="#dcc98d")
     y += row2
     y += row2
+
+    # fan
     num = Decimal(stats.cpu_fan_percentage)
     draw.text((x, y), aligner.formattedMsg(f"Fan RPM: {stats.cpu_fan_rpm}({num.quantize(Decimal('1'), rounding=ROUND_HALF_UP)}%)", word_count-1), font=font2, fill="#dcc98d")
+    y += row2
+    
+    # casefan
+    num = Decimal(stats.cpu_fan_percentage)
+    draw.text((x, y), aligner.formattedMsg(f"Case: {casefan.temp:.0f}°c ({casefan.fan_speed}%", word_count-1), font=font2, fill="#dcc98d")
     y += row2
     
     #inverted_img = ImageOps.invert(image)
@@ -225,7 +248,8 @@ def main():
 def update_frame():
     blinker.update()
     stats.update()
-    #casefan.update()
+    casefan.update()
+    
     if state == STATE_BOOTSTRAP:
         update_bootstrap()
         draw_startup_animation(True)
@@ -246,6 +270,7 @@ def handler(signum, frame):
 # termination process.
 #
 def terminate():
+    casefan.close()
     disp.fill(0)
     blinker.is_visible = False
     exit(0)

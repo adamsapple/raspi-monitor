@@ -44,6 +44,7 @@
    ```
    # GPIO Setting
    gpio=0=op,dh
+   gpio=18=op,dl
    ```
 6. `rpi-eeprom-config`を編集して電源停止時は3.3vの出力を止める
    `sudo rpi-eeprom-config -e`
