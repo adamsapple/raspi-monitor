@@ -3,7 +3,6 @@
 このリポジトリは、Raspberry Pi と PiTFT/ST7735 で動作する簡易モニタ表示アプリです。
 
 ## 概要
-- 起動時に sci-fi 風のブートアニメーションを表示します
 - CPU / メモリ / ディスク / ファン回転数などを画面に表示します
 - systemd サービスとして自動起動できます
 
@@ -22,16 +21,16 @@
 - `liblgpio` などの GPIO 関連ライブラリ
 
 ## セットアップ
-1. `pimonitor.service`を開き、配備場所のディレクトリ類を編集します。
-   ```plaintext
-   WorkingDirectory = /home/pi/services/tfttest01/     # この行と
-   ExecStart = /home/pi/services/tfttest01/.venv/bin/python /home/pi/services/tfttest01/7735.py   # この行を修正
-   ```
-2. 依存関係をインストールします
+1. 依存関係をインストールします
    ```sh
    python -m venv .venv --system-site-packages
    source .venv/bin/activate
    python -m pip install -r requirements.txt
+   ```
+2. `pimonitor.service`を開き、配備場所のディレクトリ類を編集します。
+   ```plaintext
+   WorkingDirectory = /home/pi/services/pimonitor/     # この行と
+   ExecStart = /home/pi/services/pimonitor/.venv/bin/python /home/pi/services/pimonitor/7735.py   # この行を修正
    ```
 3. サービスをインストールします
    ```sh
@@ -40,6 +39,16 @@
 4. フォントを変更する場合は、Pilファイルを生成するヘルパーを用意しました。
    ```sh
    python makePilFont.py
+   ```
+5. `/boot/firmware/config.txt` へGPIO(BackLightのPin)起動時の状態を設定
+   ```
+   # GPIO Setting
+   gpio=0=op,dh
+   ```
+6. `rpi-eeprom-config`を編集して電源停止時は3.3vの出力を止める
+   `sudo rpi-eeprom-config -e`
+   ```
+   POWER_OFF_ON_HALT=1
    ```
 
 ## 実行方法
