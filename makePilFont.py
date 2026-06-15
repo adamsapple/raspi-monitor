@@ -15,6 +15,7 @@ FONT_SIZE = 14
 #FONT_PATH    = f"./fonts/misaki_gothic.bdf"
 #FONT_PATH    = f"./fonts/HaxorMedium-10.bdf"
 #FONT_PATH    = f"./fonts/6x10.bdf"
+FONT_PATH    = f"./fonts/Bm5x8.bdf"
 #ARCHIVE_PATH = Path("fonts/terminus-font-4.49.1.tar.gz")
 #FONT_PATH    = f"terminus-font-4.49.1/ter-u{FONT_SIZE}n.bdf"
 #FONT_PATH    = f"./fonts/Bm437 NEC MultiSpeed.bdf"
@@ -24,8 +25,8 @@ FONT_SIZE = 14
 #ARCHIVE_PATH = Path("fonts/shinonome-0.9.11p1.tar.bz2")
 #FONT_PATH    = "shinonome-0.9.11/bdf/shnmk12p.bdf"
 
-ARCHIVE_PATH = Path("fonts/efont-unicode-bdf-0.4.2.tar.bz2")
-FONT_PATH    = "efont-unicode-bdf-0.4.2/f12.bdf"
+#ARCHIVE_PATH = Path("fonts/efont-unicode-bdf-0.4.2.tar.bz2")
+#FONT_PATH    = "efont-unicode-bdf-0.4.2/f12.bdf"
 
 #with open(f"/usr/share/fonts/X11/misc/ter-u{FONT_SIZE}n.bdf", "rb") as fp:
 #    font = BdfFontFile.BdfFontFile(fp)
@@ -107,13 +108,13 @@ def main():
     #if not ARCHIVE_PATH.exists():
     #    raise FileNotFoundError(f"Archive not found: {ARCHIVE_PATH}")
 
-    func = bdftbz22pil
+    #func = bdftbz22pil
     #func = bdftgz2pil
-    out_path = func(ARCHIVE_PATH, FONT_PATH)
+    #out_path = func(ARCHIVE_PATH, FONT_PATH)
     
     #func = pcfgz2pil
-    #func = bdf2pil
-    #out_path = func(FONT_PATH)
+    func = bdf2pil
+    out_path = func(FONT_PATH)
     
     print(f"{func.__name__}->\nConverted: {FONT_PATH} -> {out_path}")
     
