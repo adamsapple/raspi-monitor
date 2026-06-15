@@ -3,6 +3,10 @@
 EXEC_FILE="7735.py"
 SERVICE_FILE="pimonitor.service"
 SERVICE_FILE_PATH="/etc/systemd/system/$SERVICE_FILE"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+sed -i "s|^WorkingDirectory =.*|WorkingDirectory = ${SCRIPT_DIR}|" "${SERVICE_FILE}"
+sed -i "s|^ExecStart =.*|ExecStart = ${SCRIPT_DIR}/.venv/bin/python ${SCRIPT_DIR}/${EXEC_FILE}|" "${SERVICE_FILE}"
 
 # echo $SERVICE_FILE_PATH
 

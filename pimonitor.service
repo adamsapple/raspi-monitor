@@ -4,8 +4,8 @@ Description = pi monitor daemon
 [Service]
 User = pi
 Group = pi
-WorkingDirectory = /home/pi/services/pimonitor/
-ExecStart = /home/pi/services/pimonitor/.venv/bin/python /home/pi/services/pimonitor/7735.py
+WorkingDirectory = /foo/bar/pimonitor
+ExecStart = /foo/bar/pimonitor/.venv/bin/python /foo/bar/pimonitor/7735.py
 Restart = always
 Type = simple
 
