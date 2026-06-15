@@ -27,10 +27,10 @@
    source .venv/bin/activate
    python -m pip install -r requirements.txt
    ```
-2. ~~`pimonitor.service`を開き、配備場所のディレクトリ類を編集します。~~  ※ 3の工程で自動で更新されます。
+2. ~~`pimonitor.service`を開き、配備場所のディレクトリ類を編集します。~~  3の工程で自動で更新されます。
    ```plaintext
-   WorkingDirectory = /home/pi/services/pimonitor/     # この行と
-   ExecStart = /home/pi/services/pimonitor/.venv/bin/python /home/pi/services/pimonitor/7735.py   # この行を修正
+   WorkingDirectory = /foo/bar/pimonitor/     # この行と
+   ExecStart = /foo/bar/pimonitor/.venv/bin/python /foo/bar/pimonitor/7735.py   # この行を修正
    ```
 3. サービスをインストールします
    ```sh
