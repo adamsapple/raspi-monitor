@@ -53,8 +53,8 @@ state_change_at = 0
 # Setup SPI bus using hardware SPI:
 spi  = board.SPI()
 disp = st7735.ST7735R(spi,# rotation=270
-    x_offset=2, y_offset=1,
-    bgr=True,
+    # x_offset=2, y_offset=1, bgr=True,  # 128x160
+    x_offset=2, y_offset=1, height=128, bgr=False,  # 128x128
     cs=cs_pin,
     dc=dc_pin,
     rst=reset_pin,
@@ -77,6 +77,7 @@ disp.init()
 disp.fill(0)
 
 image  = Image.new("RGB", (width, height))
+fan_img = Image.open('./icons/icon_fan_24.png')
 font1  = ImageFont.load(FONT1_PATH)
 font2  = ImageFont.load(FONT2_PATH)
 font3  = ImageFont.load(FONT3_PATH)
@@ -111,9 +112,9 @@ def draw_startup_animation(is_visible: bool = True):
 
     host = socket.gethostname().upper()
     frame_x = 4
-    frame_y = 14
+    frame_y = 4
     frame_w = width - 8
-    frame_h = height - 28
+    frame_h = height - 8
 
     # outer frame、background を描画
     draw.rectangle((frame_x, frame_y, frame_x + frame_w - 1, frame_y + frame_h - 1),
@@ -143,7 +144,7 @@ def draw_startup_animation(is_visible: bool = True):
     pulse = int((time.time() * 10) % (width - 24))
     draw.rectangle((frame_x + 8, frame_h - 18, frame_x + 8 + pulse, frame_h - 12),
                    outline=secondary_color, fill=third_color, width=1)
-    draw.text((frame_x + 8, frame_h - 30), "bootstrap...".upper(), font=font2, fill=third_color)
+    draw.text((frame_x + 8, frame_h - 32), "bootstrap...".upper(), font=font2, fill=third_color)
 
 ##
 # update bootstrap state.
@@ -208,11 +209,12 @@ def draw_stats(is_visible:bool = True):
     y += row2
     draw.text((x, y), f"   {stats.diskUseGB:.1f} / {stats.diskTotalGB:.1f}GB", font=font3, fill="#dcc98d")
     y += row2
-    y += row2
+    y += row2 * 0.5
 
     # fan
     num = Decimal(stats.cpu_fan_percentage)
     draw.text((x, y), aligner.formattedMsg(f"Fan RPM: {stats.cpu_fan_rpm}({num.quantize(Decimal('1'), rounding=ROUND_HALF_UP)}%)", word_count-1), font=font2, fill="#dcc98d")
+    #image.paste(fan_img, (x+30, y))
     y += row2
     
     # casefan
