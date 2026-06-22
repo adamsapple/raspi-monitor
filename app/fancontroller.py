@@ -13,9 +13,10 @@ PWM_FREQ_HZ    = 25000/4
 TEMP_FILE_PATH = "/sys/block/nvme0n1/device/hwmon1/temp1_input"
 READ_INTERVAL  = 1        # seconds
 OPERATION_INTERVAL = 10   # seconds between fan speed updates
-LOWER_TEMP     = 40       # degrees Celsius
+START_TEMP     = 32  
+LOWER_TEMP     = 29       # degrees Celsius
 UPPER_TEMP     = 65       # degrees Celsius
-MIN_FAN_SPEED  = 20       # percent
+MIN_FAN_SPEED  = 30       # percent
 MAX_FAN_SPEED  = 100      # percent
 
 ##
@@ -29,6 +30,7 @@ class FanController:
         self.next_read_at      = 0
         self.next_operation_at = 0
         self.target_temp       = self._read_temp()
+        self.is_fan_enabled    = False
         self._speed_rate       = 0
     
     ##
@@ -43,16 +45,15 @@ class FanController:
     # Closes the fan controller.
     #
     def close(self) -> None:
-        self.fan.stop()
         if self.fan is not None:
             self.fan.close()
 
     def set_fan_pwm(self, gpio_pinid : int = GPIO_PWM, frequency_hz: int = PWM_FREQ_HZ, isHW = False) -> None:
         if gpio_pinid >= 0:
-            if isHW:
-                factory = PiGPIOFactory()
-            else:
-                factory = None
+            #if isHW:
+            #    factory = PiGPIOFactory()
+            #else:
+            factory = None
             self.fan = PWMOutputDevice(gpio_pinid, frequency=frequency_hz, initial_value=0, pin_factory=factory)
         else:
             self.fan = None
@@ -124,10 +125,17 @@ class FanController:
         
         if self.target_temp is None:
             return
-        
+
         if now >= self.next_operation_at:
-            self.fan_speed         = self._calculate_fan_speed(self.target_temp)
+            if self.is_fan_enabled:
+                self.fan_speed         = self._calculate_fan_speed(self.target_temp)
+            
             self.next_operation_at = now + OPERATION_INTERVAL
+
+            if self.target_temp >= START_TEMP:
+                self.is_fan_enabled = True
+            elif self.target_temp < LOWER_TEMP:
+                self.is_fan_enabled = False
 
         # print(f"Current Temp: {self.target_temp:.2f}°C -> Fan Speed: {self.fan_speed}%")
         
