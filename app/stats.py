@@ -5,6 +5,7 @@ import ipget
 import re
 import glob
 import time
+import subprocess
 from asq.initiators import query
 
 from app.history import History
@@ -50,6 +51,10 @@ class Stats:
         self.net_down_bps = 0.0
         self._net_prev    = None          # (sent, recv, t)
 
+        self.uv_now = self.throttled_now = False
+        self.uv_occurred = self.throttled_occurred = False
+        self._next_throttle_at = 0.0
+
         self.updateForce()
 
 
@@ -67,7 +72,8 @@ class Stats:
         self.updateMem()
         self.updateDisk()
         self.updateHostname()
-        self.updateNet()                  # Phase3 で追加する
+        self.updateNet()
+        self.updateThrottle()
         self._pushHistory()
 
     ##
@@ -202,3 +208,26 @@ class Stats:
                 self.net_up_bps   = max(0.0, (c.bytes_sent - psent) / dt)
                 self.net_down_bps = max(0.0, (c.bytes_recv - precv) / dt)
         self._net_prev = (c.bytes_sent, c.bytes_recv, now)
+
+    ##
+    #
+    #
+    def updateThrottle(self):
+        now = time.time()
+        
+        if now < self._next_throttle_at:
+            return
+        
+        self._next_throttle_at = now + 2.0
+
+        try:
+            out = subprocess.run(["vcgencmd", "get_throttled"],
+                                capture_output=True, text=True, timeout=1.0).stdout
+            raw = int(out.strip().split("=")[1], 16)   # 例: throttled=0x50000
+        except Exception:
+            return
+        
+        self.uv_now             = bool(raw & (1 << 0))   # 低電圧(現在)
+        self.throttled_now      = bool(raw & (1 << 2))   # スロットリング(現在)
+        self.uv_occurred        = bool(raw & (1 << 16))  # 低電圧(発生履歴)
+        self.throttled_occurred = bool(raw & (1 << 18))  # スロットリング(発生履歴)

@@ -209,8 +209,18 @@ def draw_stats(is_visible:bool = True):
     word_count  = math.floor(width / font2_width)
     x = font2_width / 2
 
+    # time
     draw.text((0, y), f"Time: {time.strftime('%H:%M:%S')}", font=font1, fill="#dcc98d")
     y += row1
+
+    # 右上にスロットリング状態のドット
+    if stats.uv_now or stats.throttled_now:
+        tcolor = ERROR_COLOR            # 現在進行(赤)
+    elif stats.uv_occurred or stats.throttled_occurred:
+        tcolor = WARN_COLOR             # 過去に発生(橙)
+    else:
+        tcolor = GREEN_COLOR            # 正常(緑)
+    draw.ellipse((width - 8, 2, width - 3, 7), fill=tcolor)
 
     # ip
     draw.text((0, y), aligner.formattedMsg(f"IP:*{stats.ip}", word_count), font=font2, fill="#dcc98d")
@@ -249,13 +259,36 @@ def draw_stats(is_visible:bool = True):
     #disp.image(inverted_img)
 
 def draw_page_cpu():
+    # draw.rectangle((0, 0, width, height), fill=BG_COLOR)
+    # draw.text((2, 0), "CPU / TEMP", font=font2, fill=FG_COLOR)
+    # draw.text((2, 20), f"CPU {stats.cpu:>3.0f}%", font=font2, fill=FG_COLOR)
     draw.rectangle((0, 0, width, height), fill=BG_COLOR)
     draw.text((2, 0), "CPU / TEMP", font=font2, fill=FG_COLOR)
-    draw.text((2, 20), f"CPU {stats.cpu:>3.0f}%", font=font2, fill=FG_COLOR)
+
+    draw.text((2, 16), f"CPU {stats.cpu:>3.0f}%", font=font2, fill=FG_COLOR)
+    draw_sparkline((2, 30, width - 3, 60), stats.hist_cpu, 0, 100, ACCENT_COLOR)
+
+    draw.text((2, 66), f"TMP {stats.temp:>4.1f}C", font=font2, fill=FG_COLOR)
+    draw_sparkline((2, 80, width - 3, 110), stats.hist_temp, 30, 85, WARN_COLOR)
+
+    draw.text((2, 113), "0-100% / 30-85C", font=font3, fill=MUTED_COLOR)
 
 def draw_page_net():
+    # draw.rectangle((0, 0, width, height), fill=BG_COLOR)
+    # draw.text((2, 0), "NETWORK", font=font2, fill=FG_COLOR)
     draw.rectangle((0, 0, width, height), fill=BG_COLOR)
     draw.text((2, 0), "NETWORK", font=font2, fill=FG_COLOR)
+    draw.text((2, 13), f"IF {NETWORK_INTERFACE}", font=font3, fill=MUTED_COLOR)
+
+    draw.text((2, 25), "DN " + human_bps(stats.net_down_bps), font=font2, fill=GREEN_COLOR)
+    dmax = max(stats.hist_down.values() or [1.0]) or 1.0
+    draw_sparkline((2, 39, width - 3, 63), stats.hist_down, 0, dmax, GREEN_COLOR)
+
+    draw.text((2, 69), "UP " + human_bps(stats.net_up_bps), font=font2, fill=ACCENT_COLOR)
+    umax = max(stats.hist_up.values() or [1.0]) or 1.0
+    draw_sparkline((2, 83, width - 3, 107), stats.hist_up, 0, umax, ACCENT_COLOR)
+
+    draw.text((2, 113), "auto-scale / 60s", font=font3, fill=MUTED_COLOR)
 
 ##
 #
