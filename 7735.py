@@ -44,12 +44,33 @@ BLACK_INTERVAL    = 60
 NETWORK_INTERFACE = "wlan0"   # put ip from this network interface.
 STORAGE_PARTITION = f"/dev/nvme0n1p2"
 
-
+# ----- state -----
 STATE_BOOTSTRAP = 0
 STATE_RUNNING   = 1
 
 state = STATE_BOOTSTRAP
 state_change_at = 0
+
+# ----- pages -----
+PAGE_OVERVIEW = 0
+PAGE_CPU      = 1
+PAGE_NET      = 2
+PAGE_COUNT    = 3
+page = PAGE_OVERVIEW
+
+def next_page():
+    global page
+    page = (page + 1) % PAGE_COUNT
+
+# ----- colors -----
+BG_COLOR     = "#1f1f28"
+FG_COLOR     = "#dcc98d"
+ACCENT_COLOR = "#7e9cd8"
+WARN_COLOR   = "#ff9552"
+ERROR_COLOR  = "#f13c31"
+GREEN_COLOR  = "#96b96b"
+MUTED_COLOR  = "#54546d"
+
 # Setup SPI bus using hardware SPI:
 spi  = board.SPI()
 disp = st7735.ST7735R(spi,# rotation=270
@@ -88,6 +109,8 @@ frame   = FrameOperator()
 aligner = Aligner()
 blinker = DisplayBlinker(btn_pinid, bl_pin, BLACK_INTERVAL)
 casefan = FanController()
+
+blinker.on_pushed = next_page
 
 ##
 # bootstrap animation.
@@ -225,6 +248,46 @@ def draw_stats(is_visible:bool = True):
     #inverted_img = ImageOps.invert(image)
     #disp.image(inverted_img)
 
+def draw_page_cpu():
+    draw.rectangle((0, 0, width, height), fill=BG_COLOR)
+    draw.text((2, 0), "CPU / TEMP", font=font2, fill=FG_COLOR)
+    draw.text((2, 20), f"CPU {stats.cpu:>3.0f}%", font=font2, fill=FG_COLOR)
+
+def draw_page_net():
+    draw.rectangle((0, 0, width, height), fill=BG_COLOR)
+    draw.text((2, 0), "NETWORK", font=font2, fill=FG_COLOR)
+
+##
+#
+#
+def human_bps(bps):
+    units = ["B/s", "K/s", "M/s", "G/s"]
+    v, i = float(bps), 0
+    while v >= 1024 and i < len(units) - 1:
+        v /= 1024.0
+        i += 1
+    return f"{v:.1f}{units[i]}"
+
+##
+#
+#
+def draw_sparkline(rect, series, vmin, vmax, color):
+    x0, y0, x1, y1 = rect
+    draw.rectangle(rect, outline=MUTED_COLOR, fill=None)
+    w, h = (x1 - x0), (y1 - y0)
+    vals = series.values()[-(w + 1):]      # 1px=1サンプル、最新を右端に
+    if len(vals) < 2:
+        return
+    span = (vmax - vmin) or 1.0
+    n = len(vals)
+    pts = []
+    for i, v in enumerate(vals):
+        x = x1 - (n - 1 - i)
+        norm = max(0.0, min(1.0, (v - vmin) / span))
+        pts.append((x, y1 - norm * h))
+    draw.line(pts, fill=color, width=1)
+
+
 ##
 # update stats and other info.
 #
@@ -248,6 +311,8 @@ def main():
 # frame update function.
 #     
 def update_frame():
+    # pages = dict(int, function)
+
     blinker.update()
     stats.update()
     casefan.update()
@@ -256,7 +321,14 @@ def update_frame():
         update_bootstrap()
         draw_startup_animation(True)
     elif state == STATE_RUNNING:
-        draw_stats(blinker.is_visible)
+        if not blinker.is_visible:
+            draw.rectangle((0, 0, width, height), fill=0)
+        elif page == PAGE_OVERVIEW:
+            draw_stats(True)            # 既存の関数をそのまま使用
+        elif page == PAGE_CPU:
+            draw_page_cpu()
+        elif page == PAGE_NET:
+            draw_page_net()
 
     disp.image(image)
     

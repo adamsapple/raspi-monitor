@@ -7,6 +7,8 @@ import glob
 import time
 from asq.initiators import query
 
+from app.history import History
+
 ##
 # NodeのCPU使用率、メモリ使用率、ディスク使用率、温度、IPアドレスなどの統計情報を管理するクラス
 #
@@ -37,14 +39,25 @@ class Stats:
         self.NETWORK_INTERFACE = network_interface
         self.STORAGE_PARTITION = storage_partition
         self.stats_expired = time.time() + self.UPDATE_INTERVAL
+
+        HISTORY_LEN = 120                 # 0.5s × 120 ≒ 60秒
+        self.hist_cpu  = History(HISTORY_LEN)
+        self.hist_temp = History(HISTORY_LEN)
+        self.hist_up   = History(HISTORY_LEN)
+        self.hist_down = History(HISTORY_LEN)
+
+        self.net_up_bps   = 0.0
+        self.net_down_bps = 0.0
+        self._net_prev    = None          # (sent, recv, t)
+
         self.updateForce()
 
 
     ##
     #
     #
-    def update(self):
-        if time.time() < self.stats_expired:
+    def update(self, is_force = False):        
+        if not is_force and time.time() < self.stats_expired:
             return
         
         self.stats_expired = time.time() + self.UPDATE_INTERVAL
@@ -54,18 +67,24 @@ class Stats:
         self.updateMem()
         self.updateDisk()
         self.updateHostname()
+        self.updateNet()                  # Phase3 で追加する
+        self._pushHistory()
 
     ##
     #
     #
     def updateForce(self):
-        self.updateIp()
-        self.updateCpu()
-        self.updateTemp()
-        self.updateMem()
-        self.updateDisk()
-        self.updateHostname()
+        self.fupdate(self, True)
 
+    ##
+    # Metricの履歴を保存しておく
+    #
+    def _pushHistory(self):
+        self.hist_cpu.push(self.cpu)
+        self.hist_temp.push(self.temp)
+        self.hist_up.push(self.net_up_bps)
+        self.hist_down.push(self.net_down_bps)
+    
     ##
     #
     #
@@ -163,3 +182,23 @@ class Stats:
     def updateHostname(self):
         self.hostname = socket.gethostname()
 
+    ##
+    #
+    #
+    def updateNet(self):
+        now = time.time()
+        try:
+            c = psutil.net_io_counters(pernic=True).get(self.NETWORK_INTERFACE)
+        except Exception:
+            c = None
+        if c is None:
+            self.net_up_bps = self.net_down_bps = 0.0
+            self._net_prev = None
+            return
+        if self._net_prev is not None:
+            psent, precv, pt = self._net_prev
+            dt = now - pt
+            if dt > 0:
+                self.net_up_bps   = max(0.0, (c.bytes_sent - psent) / dt)
+                self.net_down_bps = max(0.0, (c.bytes_recv - precv) / dt)
+        self._net_prev = (c.bytes_sent, c.bytes_recv, now)
