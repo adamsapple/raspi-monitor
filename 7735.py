@@ -15,7 +15,7 @@ from app.aligner import Aligner
 from app.frameoperator import FrameOperator
 from app.displayblinker import DisplayBlinker
 from app.fancontroller import FanController
-
+from app.kanagawa import *
 
 
 # Configuration for CS and DC pins (these are PiTFT defaults):
@@ -63,13 +63,13 @@ def next_page():
     page = (page + 1) % PAGE_COUNT
 
 # ----- colors -----
-BG_COLOR     = "#1f1f28"
-FG_COLOR     = "#dcc98d"
-ACCENT_COLOR = "#7e9cd8"
-WARN_COLOR   = "#ff9552"
-ERROR_COLOR  = "#f13c31"
-GREEN_COLOR  = "#96b96b"
-MUTED_COLOR  = "#54546d"
+# BG_COLOR     = "#1f1f28"
+# FG_COLOR     = "#dcc98d"
+# ACCENT_COLOR = "#7e9cd8"
+# WARN_COLOR   = "#ff9552"
+# ERROR_COLOR  = "#f13c31"
+# GREEN_COLOR  = "#96b96b"
+# MUTED_COLOR  = "#54546d"
 
 # Setup SPI bus using hardware SPI:
 spi  = board.SPI()
@@ -117,22 +117,22 @@ blinker.on_pushed = next_page
 #
 def draw_startup_animation(is_visible: bool = True):
     base_color  = "#16161d"     # "#4dd0ff"
-    frame_color = "#cdc8ae"      # "#4dd0ff"
-    bg_color    = "#1f1f28"   # "#10253b"
+    frame_color = FG_COLOR
+    bg_color    = BG_COLOR
 
-    primary_color   = "#dcc98d"   # "#ffffff"
-    secondary_color = "#957fb8"     # "#7cf7ff"
-    third_color     = "#54546d"     #"#9be3ff"    
-    inverted_color  = "#202a3c"     # "#1f1f28"
-    warn_color  = "#ff9552"
-    error_color = "#f13c31"
-    info_color  = "#4686ab"
-    green_color = "#96b96b"
+    primary_color   = PRIMARY_COLOR
+    secondary_color = SECONDARY_COLOR
+    third_color     = THIRD_COLOR
+    inverted_color  = INVERTED_COLOR
+    warn_color  = WARN_COLOR
+    error_color = ERROR_COLOR
+    info_color  = INFO_COLOR
+    green_color = GREEN_COLOR
 
     draw.rectangle((0, 0, width, height), outline=0, fill=base_color)
     if not is_visible:
         return
-
+    
     host = socket.gethostname().upper()
     frame_x = 4
     frame_y = 4

@@ -42,28 +42,31 @@ surimiOrange  = "#FFA066"  # Constants, imports, booleans
 katanaGray    = "#717C7C"  # Deprecated
 
 # ----- colors -----
-BG_COLOR         = sumiInk0
+BG_COLOR         = sumiInk1
 FG_COLOR         = fujiWhite
 PRIMARY_COLOR    = oldWhite
-SENCONDARY_COLOR = oniViolet
+SECONDARY_COLOR = oniViolet
 THIRD_COLOR      = sumiInk4
 INVERTED_COLOR   = sumiInk2
 ACCENT_COLOR     = oniViolet
 WARN_COLOR       = roninYellow
 ERROR_COLOR      = samuraiRed
 GREEN_COLOR      = waveAqua1
+INFO_COLOR       = springBlue
 MUTED_COLOR      = sumiInk4
+
 
 __all__ = [
     "BG_COLOR",
     "FG_COLOR",
     "PRIMARY_COLOR",
-    "SENCONDARY_COLOR",
+    "SECONDARY_COLOR",
     "THIRD_COLOR",
     "INVERTED_COLOR",
     "ACCENT_COLOR",
     "WARN_COLOR",
     "ERROR_COLOR",
     "GREEN_COLOR",
+    "INFO_COLOR",
     "MUTED_COLOR",
 ]
