@@ -80,7 +80,7 @@ class Stats:
     #
     #
     def updateForce(self):
-        self.fupdate(self, True)
+        self.update(True)
 
     ##
     # Metricの履歴を保存しておく

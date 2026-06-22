@@ -8,7 +8,7 @@ import time
 #  This class manages display visibility by controlling the backlight pin and a button.
 #
 class DisplayBlinker:
-    def __init__(self, btn_pin_id: int, bl_pin: digitalio.DigitalInOut, interval: float, , hold_time: float = 0.6):
+    def __init__(self, btn_pin_id: int, bl_pin: digitalio.DigitalInOut, interval: float, hold_time: float = 0.6):
         self.button   = Button(btn_pin_id, bounce_time=0.05, hold_time=hold_time)
         self.interval = interval       
         self.bl_pin   = bl_pin    # backlight pin (if used)
